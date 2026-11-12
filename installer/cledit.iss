@@ -14,9 +14,9 @@ AppName=Cledit
 AppVersion={#AppVersion}
 AppVerName=Cledit {#AppVersion}
 AppPublisher=Clart
-AppPublisherURL=https://github.com/C1art/edit
-AppSupportURL=https://github.com/C1art/edit/issues
-AppUpdatesURL=https://github.com/C1art/edit/releases
+AppPublisherURL=https://github.com/C1art/Cledit
+AppSupportURL=https://github.com/C1art/Cledit/issues
+AppUpdatesURL=https://github.com/C1art/Cledit/releases
 VersionInfoVersion={#AppVersion}
 ; Just for the user by default, so neither installing nor updating needs administrator
 ; rights; the first page offers installing for all users instead.
