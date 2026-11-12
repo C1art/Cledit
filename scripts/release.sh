@@ -8,7 +8,7 @@ trap 'echo "::error::${BASH_SOURCE[0]}:${LINENO}: ${BASH_COMMAND} failed"' ERR
 
 # FFmpeg 8 is what ffmpeg-sys-next 9 binds; the GPL build carries x264 and x265.
 FFMPEG_BUILD=ffmpeg-n8.1-latest-win64-gpl-shared-8.1
-REPO_URL=https://github.com/C1art/edit
+REPO_URL=https://github.com/C1art/Cledit
 : "${RUNNER_TEMP:?run this on the release workflow runner}"
 : "${GITHUB_TOKEN:?}"
 
@@ -96,7 +96,7 @@ echo "::endgroup::"
 # the installer built here before publishing, or from GitHub, as users get it, once published.
 # Before the first release made with this installer, it updates this build to itself.
 previous=$(curl -sSf -H "Authorization: Bearer $GITHUB_TOKEN" \
-  "https://api.github.com/repos/C1art/edit/releases/latest" | sed -n 's/.*"tag_name": *"v\([^"]*\)".*/\1/p')
+  "https://api.github.com/repos/C1art/Cledit/releases/latest" | sed -n 's/.*"tag_name": *"v\([^"]*\)".*/\1/p')
 previous_setup="$RUNNER_TEMP/Cledit-$previous-Setup.exe"
 if [ -z "$previous" ] || [ "$previous" = "$version" ] \
   || ! curl -sSfL -o "$previous_setup" "$REPO_URL/releases/download/v$previous/Cledit-$previous-Setup.exe"; then
@@ -109,11 +109,11 @@ probe=target/release/examples/update_probe.exe
 if [ "$previous" = "$version" ]; then
   local_setup=""
 elif [ "${PUBLISH:-false}" = true ]; then
-  GH_TOKEN=$GITHUB_TOKEN gh release create "v$version" "$setup" --repo C1art/edit \
+  GH_TOKEN=$GITHUB_TOKEN gh release create "v$version" "$setup" --repo C1art/Cledit \
     --target "${GITHUB_SHA:?}" --title "Cledit $version" --notes-file "$notes"
   # GitHub can take a moment to list a new release as the latest, which is what Cledit asks for.
   for _ in $(seq 30); do
-    curl -sSf -H "Authorization: Bearer $GITHUB_TOKEN" "https://api.github.com/repos/C1art/edit/releases/latest" \
+    curl -sSf -H "Authorization: Bearer $GITHUB_TOKEN" "https://api.github.com/repos/C1art/Cledit/releases/latest" \
       | grep -q "\"tag_name\": *\"v$version\"" && break
     sleep 10
   done

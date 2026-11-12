@@ -11,7 +11,7 @@ use std::process::{Child, Command};
 use serde::Deserialize;
 use sha2::{Digest, Sha256};
 
-const LATEST: &str = "https://api.github.com/repos/C1art/edit/releases/latest";
+const LATEST: &str = "https://api.github.com/repos/C1art/Cledit/releases/latest";
 const USER_AGENT: &str = concat!("Cledit/", env!("CARGO_PKG_VERSION"));
 /// Left next to the installed exe by the installer; a build folder has none.
 const UNINSTALLER: &str = "unins000.exe";
