@@ -45,6 +45,13 @@ const CASES: &[(&str, Expect)] = &[
         },
     ),
     ("corrupt_bytes.mp4", Expect::Damaged),
+    (
+        "photo.jpg",
+        Expect::Picture {
+            width: 97,
+            height: 55,
+        },
+    ),
     ("cover_art.mp3", Expect::Sound { seconds: 1.0 }),
     ("empty.mp4", Expect::Refused),
     (

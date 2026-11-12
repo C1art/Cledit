@@ -10,6 +10,9 @@ use super::Packet;
 use crate::turn::Turn;
 use crate::{MediaError, StreamInfo, StreamKind};
 
+/// `whence` for an absolute position, the same on every platform C runs on.
+const SEEK_SET: c_int = 0;
+
 /// An opened demuxer whose stream info has been read.
 pub(crate) struct InputContext(NonNull<sys::AVFormatContext>);
 
@@ -228,10 +231,18 @@ impl InputContext {
 
     /// Whether the file was opened as a picture, by one of the image demuxers.
     pub(crate) fn is_image(&self) -> bool {
+        self.demuxer_name()
+            .is_some_and(|name| name == "image2" || name.ends_with("_pipe"))
+    }
+
+    fn demuxer_is_image2(&self) -> bool {
+        self.demuxer_name().is_some_and(|name| name == "image2")
+    }
+
+    fn demuxer_name(&self) -> Option<String> {
         // SAFETY: the context is open, so `iformat` points to a static demuxer whose
         // name is a static string.
-        let name = unsafe { text((*self.0.as_ref().iformat).name) };
-        name.is_some_and(|name| name == "image2" || name.ends_with("_pipe"))
+        unsafe { text((*self.0.as_ref().iformat).name) }
     }
 
     /// The `timecode` tag cameras and editors write, as "01:00:00:00", on the container
@@ -293,8 +304,18 @@ impl InputContext {
         // SAFETY: the context is open; stream index -1 selects AV_TIME_BASE units.
         check(unsafe {
             sys::avformat_seek_file(self.0.as_ptr(), -1, i64::MIN, timestamp, timestamp, 0)
-        })
-        .map(drop)
+        })?;
+        // image2 reads a lone picture such as a JPEG through the context's own file,
+        // which its seek leaves at the end, so the picture would never come again.
+        // SAFETY: the context is open; `pb` is null or its open I/O context.
+        let pb = unsafe { self.0.as_ref().pb };
+        if self.demuxer_is_image2() && !pb.is_null() {
+            // SAFETY: `pb` is the non-null I/O context the open demuxer owns.
+            let rewound = unsafe { sys::avio_seek(pb, 0, SEEK_SET) };
+            // Failures are negative FFmpeg error codes; the position is not needed.
+            check(rewound.clamp(c_int::MIN.into(), 0) as c_int)?;
+        }
+        Ok(())
     }
 
     /// Has the demuxer skip every stream but `kept`, so reading one stream of a file
